@@ -9,8 +9,15 @@ def find_spans(text: str, pattern: str):
     Inputs should already be lowercased by the caller."""
 
     spans = []
+    i = 0
 
-    # ToDo 1: Copy your solution from the last exercise
+    if not pattern or len(pattern) > len(text):
+        return []
+    else:
+        while i < len(text):
+            if text[i:i + len(pattern)] == pattern:
+                spans.append((i,i+ len(pattern)))
+            i += 1
 
     return spans
 
@@ -72,13 +79,33 @@ def print_results(query: str, results, highlight: bool):
             print("  " + line_out)
 
 def combine_results(result1, result2):
+
+
     # ToDo 3)
     #  Merge the two search results:
     #         - the number of matches,
     #         - the spans in the title and
     #         - the spans found in the individual lines
     #  Returned the combined search result
-    combined = result1
+    combined = result1.copy()
+    combined['matches'] = result1['matches'] + result2['matches']
+    combined['title_spans'] = result1['title_spans'] + result2['title_spans']
+
+    combined['line_matches'] = []
+
+    for line_match in result1['line_matches']:
+        combined['line_matches'].append(line_match.copy())
+
+    for line_match in result2['line_matches']:
+        found = False
+
+        for existing_line in combined['line_matches']:
+            if line_match['line_no'] == existing_line['line_no']:
+                existing_line['spans'] = existing_line['spans'] + line_match['spans']
+                found = True
+                break
+        if not found:
+            combined['line_matches'].append(line_match.copy())
 
     return combined
 
@@ -119,7 +146,7 @@ def main() -> None:
         combined_results = []
 
         #  ToDo 2) Split the raw input string into words using a built-in method of string
-        words = raw #  ... your code here ...
+        words = raw.split()
 
         for word in words:
             # Searching for the word in all sonnets
